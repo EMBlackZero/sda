@@ -1,16 +1,28 @@
-# Stage 1: Build Next.js
-FROM node:18 AS builder
+# ใช้ Node.js image เป็น base
+FROM node:18-alpine AS builder
+
 WORKDIR /app
-COPY package.json package-lock.json ./
+
+# คัดลอก package.json และติดตั้ง dependencies
+COPY package*.json ./
 RUN npm install
+
+# คัดลอกโค้ดทั้งหมดและ build
 COPY . .
 RUN npm run build
 
-# Stage 2: Serve Next.js
-FROM node:18-slim
+# รันแอปใน production
+FROM node:18-alpine AS runner
 WORKDIR /app
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-ENV PORT=8080
-EXPOSE 8080
-CMD ["node", "server.js"]
+
+ENV NODE_ENV=production
+
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/package*.json ./
+
+RUN npm install --production
+
+EXPOSE 3000
+
+CMD ["npm", "start"]

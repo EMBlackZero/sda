@@ -1,5 +1,4 @@
 node_modules
-.tmp
-*.log
 .git
-.vscode
+.gitignore
+.next
