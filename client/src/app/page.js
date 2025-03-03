@@ -67,7 +67,7 @@ export default function Home() {
       setIsSending(true);
       try {
         const newMessageId = latestMessageId + 1;
-        await axios.post("http://localhost:1337/api/messages", {
+        await axios.post(head + "/api/messages", {
           data: {
             message: inputMessage,
             messageid: newMessageId,
