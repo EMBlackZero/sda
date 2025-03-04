@@ -150,12 +150,19 @@ export default function Home() {
   };
 
   const handleUsernameChange = () => {
-    if (newUsername.trim()) {
-      setUsername(newUsername);
-      sessionStorage.setItem("chatUsername", newUsername);
+    const nameToSave = newUsername.trim() || username; // ใช้ username ปัจจุบันถ้า newUsername ว่าง
+    if (nameToSave) { // ตรวจสอบว่า nameToSave ไม่ว่าง
+      setUsername(nameToSave);
+      sessionStorage.setItem("chatUsername", nameToSave);
       setIsModalOpen(false);
       setNewUsername("");
     }
+  };
+
+  // ตั้งค่า newUsername เป็น username ปัจจุบันเมื่อเปิด modal
+  const openModal = () => {
+    setNewUsername(username);
+    setIsModalOpen(true);
   };
 
   return (
@@ -200,7 +207,7 @@ export default function Home() {
           <div className="text-white flex justify-between items-center">
             <span className="hidden sm:inline truncate max-w-[200px] sm:max-w-none">{username}</span>
             <button
-              onClick={() => setIsModalOpen(true)}
+              onClick={openModal} // ใช้ openModal แทน setIsModalOpen(true)
               className="p-2 rounded-full hover:bg-[#5E6668] transition-colors ml-2"
             >
               <svg
@@ -240,7 +247,7 @@ export default function Home() {
                     </div>
                     <div
                       className={`${isCurrentUser ? "bg-blue-600" : "bg-gray-700"
-                        } text-white p-3 rounded-lg mt-1 inline-block break-all max-w-[80%] sm:max-w-full`}
+                        } text-white p-3 rounded-lg mt-1 inline-block break-all max-w-full sm:max-w-full`}
                     >
                       {messageContent}
                     </div>
@@ -279,7 +286,7 @@ export default function Home() {
         className={`${isModalOpen ? "flex" : "hidden"
           } overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-screen max-h-full bg-black bg-opacity-50`}
       >
-        <div className="relative p-4 w-full max-w-md max-h-full">
+        <div className="relative p-4 w-full max-w-md max-h-full">ด
           <div className="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
             <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200">
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
@@ -323,7 +330,7 @@ export default function Home() {
                     id="username"
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
                     placeholder="Enter new username"
-                    value={newUsername}
+                    value={newUsername} // ใช้ newUsername โดยตรง
                     onChange={(e) => setNewUsername(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleUsernameChange()}
                     required
