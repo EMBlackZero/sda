@@ -150,8 +150,8 @@ export default function Home() {
   };
 
   const handleUsernameChange = () => {
-    const nameToSave = newUsername.trim() || username; // ใช้ username ปัจจุบันถ้า newUsername ว่าง
-    if (nameToSave) { // ตรวจสอบว่า nameToSave ไม่ว่าง
+    const nameToSave = newUsername.trim() || username;
+    if (nameToSave) {
       setUsername(nameToSave);
       sessionStorage.setItem("chatUsername", nameToSave);
       setIsModalOpen(false);
@@ -159,7 +159,6 @@ export default function Home() {
     }
   };
 
-  // ตั้งค่า newUsername เป็น username ปัจจุบันเมื่อเปิด modal
   const openModal = () => {
     setNewUsername(username);
     setIsModalOpen(true);
@@ -207,7 +206,7 @@ export default function Home() {
           <div className="text-white flex justify-between items-center">
             <span className="hidden sm:inline truncate max-w-[200px] sm:max-w-none">{username}</span>
             <button
-              onClick={openModal} // ใช้ openModal แทน setIsModalOpen(true)
+              onClick={openModal}
               className="p-2 rounded-full hover:bg-[#5E6668] transition-colors ml-2"
             >
               <svg
@@ -229,7 +228,7 @@ export default function Home() {
 
         {/* Chat interface */}
         <div className="flex flex-col flex-grow p-4 sm:p-12 overflow-hidden">
-          <div className="p-4 h-[50vh] overflow-y-auto mb-4 rounded-lg w-full max-w-[50rem] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:p-4 sm:h-80 sm:max-w-[50rem] mx-auto">
+          <div className="p-4 flex-grow overflow-y-auto rounded-lg w-full max-w-[50rem] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:p-4 sm:h-80 sm:mb-4 sm:max-w-[50rem] mx-auto">
             {messages.map((msg) => {
               const [displayUsername, messageContent] = msg.message.split(" : ", 2);
               const storedUsername = sessionStorage.getItem("chatUsername");
@@ -258,7 +257,7 @@ export default function Home() {
             <div ref={messagesEndRef} />
           </div>
 
-          <div className="flex space-x-2 bg-[#313335] p-4 rounded-3xl w-full max-w-[50rem] mx-auto sm:p-6 sm:rounded-3xl mt-auto shrink-0">
+          <div className="flex space-x-2 bg-[#313335] p-4 rounded-3xl w-full max-w-[50rem] mx-auto sm:p-6 sm:rounded-3xl shrink-0">
             <input
               type="text"
               className="flex-grow bg-[#313335] outline-none text-white text-sm sm:text-base"
@@ -286,7 +285,7 @@ export default function Home() {
         className={`${isModalOpen ? "flex" : "hidden"
           } overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-screen max-h-full bg-black bg-opacity-50`}
       >
-        <div className="relative p-4 w-full max-w-md max-h-full">ด
+        <div className="relative p-4 w-full max-w-md max-h-full">
           <div className="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
             <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200">
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
@@ -330,7 +329,7 @@ export default function Home() {
                     id="username"
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
                     placeholder="Enter new username"
-                    value={newUsername} // ใช้ newUsername โดยตรง
+                    value={newUsername}
                     onChange={(e) => setNewUsername(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleUsernameChange()}
                     required
