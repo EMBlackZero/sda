@@ -61,17 +61,6 @@ export default function Home() {
     }
   };
 
-  // const deleteAllMessages = async () => {
-  //   try {
-  //     await axios.get(head + "/api/messages/delete-all");
-  //     console.log("Called cloud function to delete all messages");
-  //     setMessages([]);
-  //     setLatestMessageId(0);
-  //   } catch (error) {
-  //     console.error("Error calling delete cloud function:", error);
-  //   }
-  // };
-
   const deleteAllMessages = async () => {
     try {
       await axios.get(fun_cloud);
@@ -122,6 +111,7 @@ export default function Home() {
       setAlertShown(true);
       setTimeout(() => {
         setAlertMessage("");
+        setAlertShown(false);
       }, 5000);
     }
   };
@@ -169,23 +159,18 @@ export default function Home() {
   };
 
   return (
-    <div className="relative h-screen">
+    <div className="relative h-screen overflow-hidden">
       {/* Main content wrapper */}
       <div
-        className={`bg-[#1d1e20] h-full flex flex-col transition-all duration-300 ${
-          isModalOpen ? "blur-sm" : ""
-        }`}
+        className={`bg-[#1d1e20] h-full flex flex-col transition-all duration-300 ${isModalOpen ? "blur-sm" : ""
+          }`}
       >
         {/* Alert */}
         {alertShown && alertMessage && (
-          <div
-            id="alert-additional-content-5"
-            className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 p-4 border border-gray-300 rounded-lg bg-gray-50 dark:border-gray-600 dark:bg-gray-800 w-full max-w-md"
-            role="alert"
-          >
+          <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 p-4 border border-gray-600 rounded-lg bg-gray-800 w-full max-w-md sm:p-4 sm:max-w-md">
             <div className="flex items-center">
               <svg
-                className="shrink-0 w-4 h-4 me-2 dark:text-gray-300"
+                className="shrink-0 w-4 h-4 me-2 text-gray-300"
                 aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="currentColor"
@@ -194,19 +179,14 @@ export default function Home() {
                 <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
               </svg>
               <span className="sr-only">Info</span>
-              <h3 className="text-lg font-medium text-gray-800 dark:text-gray-300">
-                Warning
-              </h3>
+              <h3 className="text-lg font-medium text-gray-300">Warning</h3>
             </div>
-            <div className="mt-2 mb-4 text-sm text-gray-800 dark:text-gray-300">
-              {alertMessage}
-            </div>
+            <div className="mt-2 mb-4 text-sm text-gray-300">{alertMessage}</div>
             <div className="flex">
               <button
                 type="button"
-                className="text-gray-800 bg-transparent border border-gray-700 hover:bg-gray-800 hover:text-white focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-xs px-3 py-1.5 text-center dark:border-gray-600 dark:hover:bg-gray-600 dark:focus:ring-gray-800 dark:text-gray-300 dark:hover:text-white"
+                className="text-gray-300 bg-transparent border border-gray-600 hover:bg-gray-600 hover:text-white focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-xs px-3 py-1.5"
                 onClick={dismissAlert}
-                aria-label="Close"
               >
                 Ok
               </button>
@@ -215,10 +195,10 @@ export default function Home() {
         )}
 
         {/* Header */}
-        <div className="p-7 flex justify-between items-center">
+        <div className="p-7 flex justify-between items-center sm:p-7 shrink-0">
           <h1 className="text-xl font-bold text-white">Secret Room Chat</h1>
           <div className="text-white flex justify-between items-center">
-            {username}{" "}
+            <span className="hidden sm:inline truncate max-w-[200px] sm:max-w-none">{username}</span>
             <button
               onClick={() => setIsModalOpen(true)}
               className="p-2 rounded-full hover:bg-[#5E6668] transition-colors ml-2"
@@ -241,34 +221,26 @@ export default function Home() {
         </div>
 
         {/* Chat interface */}
-        <div className="h-screen p-12 flex flex-col items-center justify-around relative">
-
-          <div className="p-4 h-80 overflow-y-auto mb-4 rounded-lg w-full max-w-[50rem] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <div className="flex flex-col flex-grow p-4 sm:p-12 overflow-hidden">
+          <div className="p-4 h-[50vh] overflow-y-auto mb-4 rounded-lg w-full max-w-[50rem] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:p-4 sm:h-80 sm:max-w-[50rem] mx-auto">
             {messages.map((msg) => {
-              const [displayUsername, messageContent] = msg.message.split(
-                " : ",
-                2
-              );
+              const [displayUsername, messageContent] = msg.message.split(" : ", 2);
               const storedUsername = sessionStorage.getItem("chatUsername");
               const isCurrentUser = displayUsername === storedUsername;
 
               return (
                 <div
                   key={msg.messageid}
-                  className={`mb-4 break-words ${
-                    isCurrentUser ? "flex justify-end" : "flex justify-start"
-                  }`}
+                  className={`mb-4 break-words ${isCurrentUser ? "flex justify-end" : "flex justify-start"
+                    }`}
                 >
                   <div className={isCurrentUser ? "text-right" : "text-left"}>
                     <div className="text-white-400 font-bold text-sm">
                       {displayUsername}
                     </div>
                     <div
-                      className={`${
-                        isCurrentUser
-                          ? "bg-blue-600" // สีสำหรับข้อความของตัวเอง
-                          : "bg-gray-700" // สีสำหรับข้อความของคนอื่น
-                      } bg-gray-700 text-white p-3 rounded-lg mt-1 inline-block break-all`}
+                      className={`${isCurrentUser ? "bg-blue-600" : "bg-gray-700"
+                        } text-white p-3 rounded-lg mt-1 inline-block break-all max-w-[80%] sm:max-w-full`}
                     >
                       {messageContent}
                     </div>
@@ -279,10 +251,10 @@ export default function Home() {
             <div ref={messagesEndRef} />
           </div>
 
-          <div className="flex space-x-2 bg-[#313335] p-6 rounded-3xl w-full max-w-[50rem]">
+          <div className="flex space-x-2 bg-[#313335] p-4 rounded-3xl w-full max-w-[50rem] mx-auto sm:p-6 sm:rounded-3xl mt-auto shrink-0">
             <input
               type="text"
-              className="flex-grow bg-[#313335] outline-none text-white"
+              className="flex-grow bg-[#313335] outline-none text-white text-sm sm:text-base"
               placeholder="Type your message..."
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
@@ -292,9 +264,8 @@ export default function Home() {
               <button
                 onClick={sendMessage}
                 disabled={isSending}
-                className={`bg-[#5E6668] text-white px-4 py-2 rounded-3xl hover:scale-105 hover:shadow-md transition duration-200 ${
-                  isSending ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+                className={`bg-[#5E6668] text-white px-4 py-2 rounded-3xl hover:scale-105 hover:shadow-md transition duration-200 ${isSending ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
               >
                 {isSending ? "Sending..." : "Send"}
               </button>
@@ -305,12 +276,8 @@ export default function Home() {
 
       {/* Modal */}
       <div
-        id="username-modal"
-        tabIndex="-1"
-        aria-hidden={!isModalOpen}
-        className={`${
-          isModalOpen ? "flex" : "hidden"
-        } overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full`}
+        className={`${isModalOpen ? "flex" : "hidden"
+          } overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-screen max-h-full bg-black bg-opacity-50`}
       >
         <div className="relative p-4 w-full max-w-md max-h-full">
           <div className="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
@@ -358,9 +325,7 @@ export default function Home() {
                     placeholder="Enter new username"
                     value={newUsername}
                     onChange={(e) => setNewUsername(e.target.value)}
-                    onKeyDown={(e) =>
-                      e.key === "Enter" && handleUsernameChange()
-                    }
+                    onKeyDown={(e) => e.key === "Enter" && handleUsernameChange()}
                     required
                   />
                 </div>
