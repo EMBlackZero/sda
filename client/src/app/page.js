@@ -53,7 +53,7 @@ export default function Home() {
 
       checkAndSetUsername();
 
-      if (messages.length > 500) {
+      if (messages.length > 300) {
         deleteAllMessages();
       }
     } catch (error) {
@@ -145,9 +145,9 @@ export default function Home() {
         setInputMessage("");
         setLatestMessageId(newMessageId);
 
-        if (messages.length + 1 > 500) {
+        if (messages.length + 1 > 300) {
           showAlert(
-            "Messages exceed 500! Please refresh the page to clear all messages."
+            "Messages exceed 300! Please refresh the page to clear all messages."
           );
         }
       } catch (error) {
@@ -268,7 +268,7 @@ export default function Home() {
                         isCurrentUser
                           ? "bg-blue-600" // สีสำหรับข้อความของตัวเอง
                           : "bg-gray-700" // สีสำหรับข้อความของคนอื่น
-                      } bg-gray-700 text-white p-3 rounded-lg mt-1 inline-block`}
+                      } bg-gray-700 text-white p-3 rounded-lg mt-1 inline-block break-all`}
                     >
                       {messageContent}
                     </div>
