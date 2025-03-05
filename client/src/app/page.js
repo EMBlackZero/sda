@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import io from "socket.io-client";
-import Image from "next/image";
+import NextImage from "next/image";
 import urlconfig from "../../config";
 
 const head = urlconfig.serverUrlPrefix;
@@ -23,13 +23,11 @@ export default function Home() {
   const [selectedImage, setSelectedImage] = useState(null);
   const messagesEndRef = useRef(null);
 
-  // สุ่ม username
   const generateRandomUsername = () => {
     const randomNum = Math.floor(Math.random() * 10000000);
     return `Anonymous-${randomNum}`;
   };
 
-  // ตรวจสอบและตั้งค่า username
   const checkAndSetUsername = () => {
     const storedUsername = sessionStorage.getItem("chatUsername");
     if (storedUsername) {
@@ -136,7 +134,10 @@ export default function Home() {
 
         if (inputMessage.trim() !== "") {
           messageData.data.message = `${username} : ${inputMessage}`;
+        } else {
+          messageData.data.message = `${username} : `;
         }
+
         if (selectedImage) {
           messageData.data.imageText = selectedImage;
         }
@@ -182,20 +183,78 @@ export default function Home() {
         showAlert("Image size must be less than 1 MB!", "danger");
         return;
       }
+
+      const htmlImage = new Image();
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setSelectedImage(reader.result);
+
+      reader.onload = (event) => {
+        htmlImage.src = event.target.result;
+
+        htmlImage.onload = () => {
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+
+          const MAX_WIDTH = 800; // ขนาดสูงสุดสำหรับเดสก์ท็อป
+          const MAX_HEIGHT = 800;
+          const MOBILE_MAX_WIDTH = 400; // ขนาดสูงสุดสำหรับมือถือ
+          const MOBILE_MAX_HEIGHT = 400;
+
+          // ตรวจสอบว่าเป็นมือถือหรือไม่ (ใช้ window.innerWidth)
+          const isMobile = window.innerWidth <= 768;
+          const maxWidth = isMobile ? MOBILE_MAX_WIDTH : MAX_WIDTH;
+          const maxHeight = isMobile ? MOBILE_MAX_HEIGHT : MAX_HEIGHT;
+
+          let width = htmlImage.width;
+          let height = htmlImage.height;
+
+          if (width > height) {
+            if (width > maxWidth) {
+              height = height * (maxWidth / width);
+              width = maxWidth;
+            }
+          } else {
+            if (height > maxHeight) {
+              width = width * (maxHeight / height);
+              height = maxHeight;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          ctx.drawImage(htmlImage, 0, 0, width, height);
+
+          const resizedBase64 = canvas.toDataURL("image/jpeg", 0.7);
+          console.log("Resized base64 length:", resizedBase64.length);
+
+          if (resizedBase64.startsWith("data:image/")) {
+            setSelectedImage(resizedBase64);
+          } else {
+            showAlert("Error processing image!", "danger");
+          }
+        };
+
+        htmlImage.onerror = () => {
+          showAlert("Error loading image file!", "danger");
+        };
       };
+
+      reader.onerror = () => {
+        showAlert("Error reading image file!", "danger");
+      };
+
       reader.readAsDataURL(file);
     }
+  };
+
+  const isValidBase64Image = (str) => {
+    return str && typeof str === "string" && str.startsWith("data:image/");
   };
 
   return (
     <div className="relative h-screen overflow-hidden">
       <div
-        className={`bg-[#1d1e20] h-full flex flex-col transition-all duration-300 ${
-          isModalOpen ? "blur-sm" : ""
-        }`}
+        className={`bg-[#1d1e20] h-full flex flex-col transition-all duration-300 ${isModalOpen ? "blur-sm" : ""
+          }`}
       >
         {alertShown && alertMessage && (
           <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-md">
@@ -253,11 +312,7 @@ export default function Home() {
 
         <div className="p-7 flex justify-between items-center sm:p-7 shrink-0">
           <div className="flex items-center">
-            <img
-              src="/logo3.png"
-              alt="Logo"
-              className="h-8 w-8 mr-2"
-            />
+            <img src="/logo3.png" alt="Logo" className="h-8 w-8 mr-2" />
             <h1 className="text-xl font-bold text-white">Secret Room Chat</h1>
           </div>
           <div className="text-white flex justify-between items-center">
@@ -288,55 +343,45 @@ export default function Home() {
         <div className="flex flex-col flex-grow p-4 sm:p-12 overflow-hidden">
           <div className="p-4 flex-grow overflow-y-auto rounded-lg w-full max-w-[50rem] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:p-4 sm:h-80 sm:mb-4 sm:max-w-[50rem] mx-auto">
             {messages.map((msg) => {
-              const [displayUsername, messageContent] = msg.message?.split(
-                " : ",
-                2
-              ) || [username, ""];
+              // กำหนดค่า displayUsername โดยตรวจสอบว่ามี message หรือไม่
+              const [displayUsername, messageContent] = msg.message
+                ? msg.message.split(" : ", 2)
+                : [msg.username || username, ""]; // ใช้ msg.username เป็นตัวช่วยถ้าไม่มีข้อความ
+
               const storedUsername = sessionStorage.getItem("chatUsername");
-              const isCurrentUser = displayUsername === storedUsername;
+              const isCurrentUser = displayUsername?.trim() === storedUsername?.trim();
 
               return (
                 <div
                   key={msg.messageid}
-                  className={`mb-4 break-words ${
-                    isCurrentUser ? "flex justify-end" : "flex justify-start"
-                  }`}
+                  className={`mb-4 break-words ${isCurrentUser ? "flex justify-end" : "flex justify-start"}`}
                 >
-                  <div
-                    className={`${
-                      isCurrentUser ? "text-right" : "text-left"
-                    } w-full`}
-                  >
-                    <div className="text-white-400 font-bold text-sm">
-                      {displayUsername}
-                    </div>
+                  <div className={`flex flex-col ${isCurrentUser ? "items-end text-right" : "items-start text-left"}`}>
+                    {/* แสดงชื่อผู้ส่ง */}
+                    <div className="text-white-400 font-bold text-sm">{displayUsername}</div>
+
+                    {/* แสดงข้อความถ้ามี */}
                     {messageContent && (
-                      <div
-                        className={`${
-                          isCurrentUser ? "bg-blue-600" : "bg-gray-700"
-                        } text-white p-3 rounded-lg mt-1 inline-block break-all max-w-full sm:max-w-full`}
-                      >
+                      <div className={`${isCurrentUser ? "bg-blue-600" : "bg-gray-700"} text-white p-3 rounded-lg mt-1 inline-block break-all max-w-full sm:max-w-full`}>
                         {messageContent}
                       </div>
                     )}
-                    {msg.imageText && (
-                      <div
-                        className={`mt-2 w-full max-w-[50%] ${
-                          isCurrentUser ? "ml-auto" : "mr-auto"
-                        }`}
-                      >
-                        <Image
+
+                    {/* แสดงรูปภาพให้ตรงกับชื่อเจ้าของ */}
+                    {msg.imageText && isValidBase64Image(msg.imageText) && (
+                      <div className={`mt-2 ${isCurrentUser ? "text-right" : "text-left"}`}>
+                        <NextImage
                           src={msg.imageText}
                           alt="uploaded"
-                          layout="responsive"
-                          width={1000} // กำหนดขนาดฐาน (จะถูกปรับเป็น 50% ของหน้าจอ)
-                          height={1000} // ปรับตามสัดส่วนที่เหมาะสม (สมมติ 1:1 หรือตามภาพจริง)
-                          sizes="(max-width: 768px) 90vw, (max-width: 1200px) 50vw, 50vw" // กำหนดให้ความกว้าง 50% เสมอ
-                          className="rounded-md object-contain"
-                          quality={85}
-                          onError={(e) =>
-                            console.error("Error loading image:", e)
-                          }
+                          width={250}
+                          height={250}
+                          sizes="(max-width: 768px) 80vw, 400px"
+                          unoptimized
+                          className="rounded-md object-contain w-full h-auto max-w-[50vw] max-h-[40vh] md:max-w-[250px] md:max-h-[250px]"
+                          onError={(e) => {
+                            console.error("Error loading image:", e);
+                            e.target.style.display = "none";
+                          }}
                         />
                       </div>
                     )}
@@ -344,6 +389,8 @@ export default function Home() {
                 </div>
               );
             })}
+
+
             <div ref={messagesEndRef} />
           </div>
 
@@ -387,11 +434,7 @@ export default function Home() {
                   fill="none"
                   stroke="currentColor"
                 >
-                  <path
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
+                  <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
                   <circle cx="8.5" cy="8.5" r="1.5" />
                   <polyline points="21 15 16 10 5 21" />
@@ -401,9 +444,8 @@ export default function Home() {
             <button
               onClick={sendMessage}
               disabled={isSending}
-              className={`bg-[#5E6668] text-white px-4 py-2 rounded-3xl hover:scale-105 hover:shadow-md transition duration-200 ${
-                isSending ? "opacity-50 cursor-not-allowed" : ""
-              }`}
+              className={`bg-[#5E6668] text-white px-4 py-2 rounded-3xl hover:scale-105 hover:shadow-md transition duration-200 ${isSending ? "opacity-50 cursor-not-allowed" : ""
+                }`}
             >
               {isSending ? "Sending..." : "Send"}
             </button>
@@ -412,9 +454,8 @@ export default function Home() {
       </div>
 
       <div
-        className={`${
-          isModalOpen ? "flex" : "hidden"
-        } overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-screen max-h-full bg-black bg-opacity-50`}
+        className={`${isModalOpen ? "flex" : "hidden"
+          } overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-screen max-h-full bg-black bg-opacity-50`}
       >
         <div className="relative p-4 w-full max-w-md max-h-full">
           <div className="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
