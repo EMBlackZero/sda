@@ -202,7 +202,15 @@ export default function Home() {
 
         {/* Header */}
         <div className="p-7 flex justify-between items-center sm:p-7 shrink-0">
-          <h1 className="text-xl font-bold text-white">Secret Room Chat</h1>
+          <div className="flex items-center">
+            <img
+              src="/logo3.png"
+              alt="Logo"
+              className="h-8 w-8 mr-2"
+            />
+            <h1 className="text-xl font-bold text-white">Secret Room Chat</h1>
+
+          </div>
           <div className="text-white flex justify-between items-center">
             <span className="hidden sm:inline truncate max-w-[200px] sm:max-w-none">{username}</span>
             <button
