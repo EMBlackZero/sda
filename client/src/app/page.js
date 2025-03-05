@@ -259,7 +259,6 @@ export default function Home() {
               className="h-8 w-8 mr-2"
             />
             <h1 className="text-xl font-bold text-white">Secret Room Chat</h1>
-
           </div>
           <div className="text-white flex justify-between items-center">
             <span className="hidden sm:inline truncate max-w-[200px] sm:max-w-none">
@@ -303,7 +302,11 @@ export default function Home() {
                     isCurrentUser ? "flex justify-end" : "flex justify-start"
                   }`}
                 >
-                  <div className={isCurrentUser ? "text-right" : "text-left"}>
+                  <div
+                    className={`${
+                      isCurrentUser ? "text-right" : "text-left"
+                    } w-full`}
+                  >
                     <div className="text-white-400 font-bold text-sm">
                       {displayUsername}
                     </div>
@@ -317,14 +320,20 @@ export default function Home() {
                       </div>
                     )}
                     {msg.imageText && (
-                      <div className="mt-2 w-full">
+                      <div
+                        className={`mt-2 w-full max-w-[50%] ${
+                          isCurrentUser ? "ml-auto" : "mr-auto"
+                        }`}
+                      >
                         <Image
                           src={msg.imageText}
                           alt="uploaded"
                           layout="responsive"
-                          width={1000} // เพิ่มขนาดให้ใหญ่ขึ้นเพื่อรองรับรูปภาพที่มีความละเอียดสูง
-                          height={1000} // ปรับตามสัดส่วนที่เหมาะสม
-                          className="rounded-md object-contain w-full h-auto max-h-[80vh] md:max-h-[60vh] lg:max-h-[50vh]"
+                          width={1000} // กำหนดขนาดฐาน (จะถูกปรับเป็น 50% ของหน้าจอ)
+                          height={1000} // ปรับตามสัดส่วนที่เหมาะสม (สมมติ 1:1 หรือตามภาพจริง)
+                          sizes="(max-width: 768px) 90vw, (max-width: 1200px) 50vw, 50vw" // กำหนดให้ความกว้าง 50% เสมอ
+                          className="rounded-md object-contain"
+                          quality={85}
                           onError={(e) =>
                             console.error("Error loading image:", e)
                           }
