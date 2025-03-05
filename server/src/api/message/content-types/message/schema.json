@@ -16,6 +16,9 @@
     },
     "message": {
       "type": "text"
+    },
+    "imageText": {
+      "type": "text"
     }
   }
 }
